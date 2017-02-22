@@ -26,21 +26,16 @@ def about():
     """Render the website's about page."""
     return render_template('about.html')
     
-@app.route('/secure-page')
+@app.route('/secure-page/')
 @login_required
-def secure_page():
-    """Render a secure page on our website that only logged in users can access."""
-    #if not session.get('logged_in'):
-        #login_user()
-        #return redirect(url_for('login'))
-    return render_template('securepage.html')
-
+def secure-page():
+    if session.get('logged_in'):
+        return render_template('securepage.html')
+    else:
+        return redirect(url_for('login'))
     
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('secure_page'))
-        
     form = LoginForm()
     if request.method == "POST" and form.validate_on_submit():
         # change this to actually validate the entire form submission
@@ -56,22 +51,13 @@ def login():
             user = UserProfile.query.filter_by(username=username, password=password).first()
             
             # get user id, load into session
-            if user is not None:
-                login_user(user)
-    
-                # remember to flash a message to the user
-                
-                flash('Logged in successfully.')
-                next = request.args.get('next')
-                return redirect(url_for('secure_page'))
+            login_user(user)
+
+            # remember to flash a message to the user
+            flash('Logged in successfully.')
+            return redirect(url_for('secure-page'))
             #return redirect(url_for("home")) # they should be redirected to a secure-page route instead
     return render_template("login.html", form=form)
-    
-@app.route('/logout')
-def logout():
-    logout_user()
-    flash('You were logged out')
-    return redirect(url_for('home'))
 
 # user_loader callback. This callback is used to reload the user object from
 # the user ID stored in the session
