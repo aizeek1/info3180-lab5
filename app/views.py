@@ -26,7 +26,7 @@ def about():
     """Render the website's about page."""
     return render_template('about.html')
     
-@app.route('/secure-page')
+@app.route('/secure-page/')
 @login_required
 def secure_page():
     """Render a secure page on our website that only logged in users can access."""
@@ -64,6 +64,10 @@ def login():
                 flash('Logged in successfully.')
                 next = request.args.get('next')
                 return redirect(url_for('secure_page'))
+            else:
+                flash('Username or Password is incorrect.', 'danger')
+
+    flash_errors(form)
             #return redirect(url_for("home")) # they should be redirected to a secure-page route instead
     return render_template("login.html", form=form)
     
@@ -100,6 +104,13 @@ def add_header(response):
     response.headers['Cache-Control'] = 'public, max-age=0'
     return response
 
+def flash_errors(form):
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(u"Error in the %s field - %s" % (
+                getattr(form, field).label.text,
+                error
+            ), 'danger')
 
 @app.errorhandler(404)
 def page_not_found(error):
